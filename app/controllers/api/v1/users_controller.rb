@@ -35,6 +35,7 @@ class Api::V1::UsersController < ApplicationController
 
   def sign_in
     @user = User.find_by(username: params[:username])
+    #todo: check if enabled
 
     if @user.present? && @user.authenticate(params[:password])
       @user.generate_token
@@ -65,6 +66,8 @@ class Api::V1::UsersController < ApplicationController
       render json: {error: 'Invalid password'},status: :unauthorized
     end
   end
+
+  #TODO def current
 
   private
 

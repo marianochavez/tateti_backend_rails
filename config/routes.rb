@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
 
-      resources :boards do
+      resources :boards, only: [:index,:show,:create] do
         member do
           put 'join-game', as: :join_game
           put :play
