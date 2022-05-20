@@ -5,7 +5,7 @@ class Board < ApplicationRecord
   serialize :table #save an object
 
   def initialize_board(current_user)
-    self.table = {}
+    self.table = [nil]*9
     self.state = 'Queue'
     self.turn = rand(2) == 0 ? 'X' : 'O'
     self.users.push(current_user)
@@ -21,19 +21,16 @@ class Board < ApplicationRecord
   end
 
   def insert_in(index)
-    i = index.to_i
-    self.table[i] = turn
+    index = index.to_i
+    self.table[index] = turn
+  end
+
+  def valid_place?(index)
+    index = index.to_i
+    self.table[index] == nil && index >= 0 && index <9
   end
 
   def winner?(current_user)
-    turn = user_symbol(current_user)
-
-    positions_turn = []
-    self.table.each do |key, value|
-      if value == turn
-        positions_turn.push(key)
-      end
-    end
     winning_position = [
       [0, 1, 2],
       [3, 4, 5],
@@ -44,17 +41,19 @@ class Board < ApplicationRecord
       [0, 4, 8],
       [2, 4, 6],
     ]
+    turn = user_symbol(current_user)
 
-    winning_position.each { |position|
-      if position - positions_turn == []
-        return true
+    winning_position.length.times do |i|
+      a,b,c = winning_position[i]
+      if self.table[a] && self.table[a] == self.table[b] && self.table[a] == self.table[c]
+        return self.table[a] == turn
       end
-    }
-    false
+    end
+    nil
   end
 
   def draw?
-    self.table.length == 9
+    !winner && self.table.map.select{|item| !item}.length == 0
   end
 
   def set_winner(current_user)
@@ -64,6 +63,7 @@ class Board < ApplicationRecord
 
   def set_draw
     self.state = 'Draw'
+    self.winner = 'Empate'
   end
 
   def set_turn
@@ -79,11 +79,6 @@ class Board < ApplicationRecord
   def valid_turn?(current_user)
     symbol = user_symbol(current_user)
     self.turn == symbol
-  end
-
-  def valid_place?(index)
-    index = index.to_i
-    self.table[index] == nil && index >= 0 && index <9
   end
 
   def can_join?(current_user)

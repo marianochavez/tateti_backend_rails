@@ -1,7 +1,7 @@
 class Api::V1::BoardsController < ApplicationController
-  before_action :set_user, only: [:create, :join_game, :play,:show]
-  before_action :check_token, only: [:create, :join_game, :play,:show]
-  before_action :set_board, only: [:join_game, :show, :play,:show]
+  before_action :set_user, only: [:create, :join_game, :play, :show, :leave]
+  before_action :check_token, only: [:create, :join_game, :play, :show, :leave]
+  before_action :set_board, only: [:join_game, :show, :play, :show, :leave]
   before_action :check_state, only: [:join_game, :play]
 
   def index
@@ -68,6 +68,26 @@ class Api::V1::BoardsController < ApplicationController
     end
     @board.save
     render json: { board: @board, X: @board.users[0].name, O: @board.users[1].name }, status: :ok
+  end
+
+  def historical
+    @user1 = User.find_by(id: params[:id_1])
+    @user2 = User.find_by(id: params[:id_2])
+    @boards = @user1.boards.filter { |board| board.users.include? @user2 }
+    @boards_fil = @boards
+
+    render json: { data: @boards_fil }
+  end
+
+  def leave
+    unless @board.users.ids.include? @user.id
+      return render json: { error: 'Unauthorized' }, status: :unauthorized
+    end
+
+    @board.state = 'Finished'
+    if @board.save
+      render json: {data: @board}, status: :ok
+    end
   end
 
   private

@@ -1,7 +1,7 @@
 class Api::V1::UsersController < ApplicationController
 
-  before_action :set_user, only: [:enable, :disable, :password]
-  before_action :check_token, only: [:enable, :disable]
+  before_action :set_user, only: [:enable, :disable, :password, :sign_out]
+  before_action :check_token, only: [:enable, :disable, :sign_out]
 
   def index
     @users = User.all
@@ -39,6 +39,7 @@ class Api::V1::UsersController < ApplicationController
 
     if @user.present? && @user.authenticate(params[:password])
       @user.generate_token
+      @user.save
       render json: { data: @user }, status: :ok
     else
       error = @user.blank? ? 'User does not exist' : 'Invalid password'
@@ -47,7 +48,8 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def sign_out
-    if @user.generate_token
+    @user.generate_token
+    if @user.save
       render status: :ok
     else
       render status: :bad_request

@@ -6,6 +6,10 @@ Rails.application.routes.draw do
         member do
           put 'join-game', as: :join_game
           put :play
+          put :leave
+        end
+        collection do
+          post :historical
         end
       end
 
@@ -16,7 +20,7 @@ Rails.application.routes.draw do
         end
         collection do
           post 'sign-in', as: :sing_in
-          get 'sing-out', as: :sign_out
+          post 'sign-out', as: :sign_out
           # post :password #TODO: delete?
         end
       end
