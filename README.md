@@ -1,24 +1,13 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+![heroku](https://media-exp1.licdn.com/dms/image/C4E0BAQGmNZMDOpmMQg/company-logo_200_200/0/1519905610801?e=2159024400&v=beta&t=D5lu9rTbQ_aW1ubme8GIq_QhKIm8WTiXTtoBlEHPcA8)
 
-Things you may want to cover:
+Deploy: https://tateti-rails.herokuapp.com/
 
-* Ruby version
+## Frontend
 
-* System dependencies
+https://github.com/marianochavez/tateti_frontend_react
 
-* Configuration
+## Endpoints
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+https://www.getpostman.com/collections/25c8a0e79e8ccf9f9e52
