@@ -10,4 +10,4 @@ https://github.com/marianochavez/tateti_frontend_react
 
 ## Endpoints
 
-https://www.getpostman.com/collections/25c8a0e79e8ccf9f9e52
+https://documenter.getpostman.com/view/15545641/Uz59MyZq
