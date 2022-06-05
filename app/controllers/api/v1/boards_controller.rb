@@ -1,8 +1,9 @@
 class Api::V1::BoardsController < ApplicationController
+  before_action :set_board, only: [:show, :play, :leave]
+  before_action :find_by_token, only: [:join_game]
+  before_action :check_state, only: [:join_game, :play]
   before_action :set_user, only: [:create, :join_game, :play, :show, :leave]
   before_action :check_token, only: [:create, :join_game, :play, :show, :leave]
-  before_action :set_board, only: [:join_game, :show, :play, :show, :leave]
-  before_action :check_state, only: [:join_game, :play]
 
   def index
     @boards = Board.all
@@ -18,7 +19,7 @@ class Api::V1::BoardsController < ApplicationController
       end
       render json: { board: @board, X: @board.users[0].name, O: @board.users[1].name }, status: :ok
     else
-      render json: { board: @board, X: @board.users[0].name, O: null }, status: :ok
+      render json: { board: @board, X: @board.users[0].name }, status: :ok
     end
   end
 
@@ -35,6 +36,10 @@ class Api::V1::BoardsController < ApplicationController
   def join_game
     unless @board.can_join?(@user)
       return render json: { error: 'Not possible to join' }, status: :bad_request
+    end
+
+    unless @board.valid_token?(params[:token])
+      return render json: { error: 'Board token is not valid' }, status: :bad_request
     end
 
     @board.join_game(@user)
@@ -103,7 +108,15 @@ class Api::V1::BoardsController < ApplicationController
   def check_state
     return if @board.state != "Finished"
 
-    render json: { data: "The game is over, the winner is #{@board.winner}" }, status: :ok
+    render json: { data: "The game is over, the winner is #{@board.winner}" }, status: :bad_request
+    false
+  end
+
+  def find_by_token
+    @board = Board.find_by(token: params[:token])
+    return if @board.present?
+
+    render json: { error: 'Board not found' }, status: :not_found
     false
   end
 end

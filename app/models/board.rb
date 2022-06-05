@@ -9,6 +9,7 @@ class Board < ApplicationRecord
     self.state = 'Queue'
     self.turn = rand(2) == 0 ? 'X' : 'O'
     self.users.push(current_user)
+    self.token = SecureRandom.hex(5)
   end
 
   def join_game(current_user)
@@ -83,5 +84,9 @@ class Board < ApplicationRecord
 
   def can_join?(current_user)
     self.users.include?(current_user) ? false : self.users.count == 1
+  end
+
+  def valid_token?(token)
+    self.token == token
   end
 end

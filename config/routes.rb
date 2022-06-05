@@ -4,11 +4,11 @@ Rails.application.routes.draw do
 
       resources :boards, only: [:index,:show,:create] do
         member do
-          put 'join-game', as: :join_game
           put :play
           put :leave
         end
         collection do
+          put 'join-game', as: :join_game
           post :historical
         end
       end

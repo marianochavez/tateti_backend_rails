@@ -6,6 +6,7 @@ class CreateBoards < ActiveRecord::Migration[7.0]
       t.string :turn
       t.string :winner
       t.boolean :myTurn
+      t.string :token
 
       t.timestamps
     end
