@@ -76,12 +76,16 @@ class Api::V1::BoardsController < ApplicationController
   end
 
   def historical
-    @user1 = User.find_by(id: params[:id_1])
-    @user2 = User.find_by(id: params[:id_2])
-    @boards = @user1.boards.filter { |board| board.users.include? @user2 }
-    @boards_fil = @boards
+    @user1 = User.find_by(username: params[:username_1])
+    @user2 = User.find_by(username: params[:username_2])
+    
+    if @user2.present?
+      @boards = @user1.boards.filter { |board| board.users.include? @user2 }
+    else
+      @boards = @user1.boards
+    end
 
-    render json: { data: @boards_fil }
+    render json: { data: @boards }, status: :ok
   end
 
   def leave
