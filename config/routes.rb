@@ -16,6 +16,7 @@ Rails.application.routes.draw do
           post 'sign-out', as: :sign_out
         end
       end
+
     end
   end
 end

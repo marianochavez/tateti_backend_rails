@@ -7,34 +7,56 @@ class Board < ApplicationRecord
   before_create :set_init_table
   before_create :set_init_turn
 
-  enum state: { Queue: 0, Playing: 1, Finished: 2 }
+  enum state: { Queue: 0, Playing: 1, Finished: 2, Draw: 3, Abandoned: 4 }
 
   serialize :table
 
   include Filterable
-  scope :filter_by_state, -> (state) {where state: state}
-  scope :filter_by_user_1, -> (user_1) {where user_1: user_1}
-  scope :filter_by_user_2, -> (user_2) {where user_2: user_2}
+  scope :filter_by_state, -> (state) { where state: state }
+  scope :filter_by_user_1, -> (user_1) { where user_1: user_1 }
+  scope :filter_by_user_2, -> (user_2) { where user_2: user_2 }
 
   def set_init_table
-    self.table = [nil]*9
+    self.table = [nil] * 9
   end
 
   def set_init_turn
     self.turn = rand(2) == 0 ? 'X' : 'O'
   end
 
-  def set_user(index,user)
-    index == 1 ? self.user_1 = user : self.user_2 = user
+  def create_game(user)
+    self.user_1 = user
   end
 
-  def join_game(current_user)
-    self.user_1 = current_user
-    self.state = 3
+  def join_game(user)
+    self.user_2 = user
+    self.state = 1
+  end
+
+  def can_play?(user)
+    unless !user_2.present? || user_symbol(user) == turn
+      return false
+    end
+
+    true
   end
 
   def user_symbol(user)
-    self.users.index(user) == 0 ? 'X' : 'O'
+    user == user_1 ? 'X' : 'O'
+  end
+
+  def play(index, user)
+    insert_in(index)
+    if winner?(user)
+      set_winner(user)
+      set_state(2)
+    else
+      if draw?
+        set_draw
+      else
+        set_turn
+      end
+    end
   end
 
   def insert_in(index)
@@ -44,7 +66,7 @@ class Board < ApplicationRecord
 
   def valid_place?(index)
     index = index.to_i
-    self.table[index] == nil && index >= 0 && index <9
+    table[index] == nil && index >= 0 && index < 9
   end
 
   def winner?(current_user)
@@ -61,7 +83,7 @@ class Board < ApplicationRecord
     turn = user_symbol(current_user)
 
     winning_position.length.times do |i|
-      a,b,c = winning_position[i]
+      a, b, c = winning_position[i]
       if self.table[a] && self.table[a] == self.table[b] && self.table[a] == self.table[c]
         return self.table[a] == turn
       end
@@ -70,16 +92,15 @@ class Board < ApplicationRecord
   end
 
   def draw?
-    !winner && self.table.map.select{|item| !item}.length == 0
+    !winner && self.table.map.select { |item| !item }.length == 0
   end
 
-  def set_winner(current_user)
-    self.winner = current_user.name
-    self.state = 'Finished'
+  def set_winner(user)
+    self.winner = user
   end
 
   def set_draw
-    self.state = 'Draw'
+    self.state = 3
     self.winner = 'Empate'
   end
 
@@ -88,22 +109,16 @@ class Board < ApplicationRecord
     self.turn = other
   end
 
-  def set_my_turn(current_user)
-    turn = valid_turn?(current_user)
-    self.myTurn = turn
-  end
-
-  def valid_turn?(current_user)
-    symbol = user_symbol(current_user)
-    self.turn == symbol
-  end
-
   def can_join?(user)
     (user_1 == user || user_2 == user) ? false : !user_2.present?
   end
 
-  # def valid_token?(token)
-  #   self.token == token
-  # end
+  def can_leave?(user)
+    user == user_1 || user == user_2
+  end
+
+  def set_state(index)
+    self.state = index
+  end
 
 end
