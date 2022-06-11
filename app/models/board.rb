@@ -2,6 +2,8 @@ class Board < ApplicationRecord
 
   has_many :users
 
+  validates :user_1, presence: true
+
   before_create :set_init_table
   before_create :set_init_turn
 
@@ -20,6 +22,10 @@ class Board < ApplicationRecord
 
   def set_init_turn
     self.turn = rand(2) == 0 ? 'X' : 'O'
+  end
+
+  def set_user(index,user)
+    index == 1 ? self.user_1 = user : self.user_2 = user
   end
 
   def join_game(current_user)
@@ -92,12 +98,12 @@ class Board < ApplicationRecord
     self.turn == symbol
   end
 
-  def can_join?(current_user)
-    self.users.include?(current_user) ? false : self.users.count == 1
+  def can_join?(user)
+    (user_1 == user || user_2 == user) ? false : !user_2.present?
   end
 
-  def valid_token?(token)
-    self.token == token
-  end
+  # def valid_token?(token)
+  #   self.token == token
+  # end
 
 end

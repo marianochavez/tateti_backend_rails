@@ -1,8 +1,8 @@
 class Api::V1::BoardsController < ApplicationController
   before_action :set_user, only: [:create, :join_game, :play, :show, :leave]
   before_action :check_token, only: [:create, :join_game, :play, :show, :leave] #user
-  before_action :set_board, only: [:show, :play, :leave]
-  before_action :find_by_token, only: [:join_game] #find table by token
+  before_action :set_board, only: [:show, :play, :leave, :join_game]
+  # before_action :find_by_token, only: [:join_game] #find table by token
   before_action :check_state, only: [:join_game, :play]
 
   def index
@@ -24,12 +24,12 @@ class Api::V1::BoardsController < ApplicationController
   end
 
   def create
-    @board = Board.new
-    @board.initialize_board(@user)
-    if @board.save
-      render json: { data: @board }, status: :created
+    board = Board.new
+    board.set_user(1, @user["username"])
+    if board.save
+      render json: { data: board }, status: :created
     else
-      render json: { error: @board.errors }, status: :bad_request
+      render json: { error: board.errors }, status: :bad_request
     end
   end
 
@@ -38,11 +38,7 @@ class Api::V1::BoardsController < ApplicationController
       return render json: { error: 'Not possible to join' }, status: :bad_request
     end
 
-    unless @board.valid_token?(params[:token])
-      return render json: { error: 'Board token is not valid' }, status: :bad_request
-    end
-
-    @board.join_game(@user)
+    @board.set_user(2, @user["username"])
     if @board.save
       render json: { data: @board }, status: :ok
     else
@@ -76,21 +72,6 @@ class Api::V1::BoardsController < ApplicationController
     end
     @board.save
     render json: { board: @board, X: @board.users[0].name, O: @board.users[1].name }, status: :ok
-  end
-
-  def historical
-    # user query params
-    # ransack
-    @user1 = User.find_by(username: params[:username_1])
-    @user2 = User.find_by(username: params[:username_2])
-
-    if @user2.present?
-      @boards = @user1.boards.filter { |board| board.users.include? @user2 }
-    else
-      @boards = @user1.boards
-    end
-
-    render json: { data: @boards }, status: :ok
   end
 
   def leave

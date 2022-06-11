@@ -6,10 +6,6 @@ Rails.application.routes.draw do
         member do
           put :play
           put :leave
-          get :historical
-        end
-        collection do
-          # cambiar a member, pasar el token por id
           put 'join-game', as: :join_game
         end
       end
