@@ -5,7 +5,6 @@ class Board < ApplicationRecord
   validates :user_1, presence: true
 
   before_create :set_init_table
-  before_create :set_init_turn
 
   enum state: { Queue: 0, Playing: 1, Finished: 2, Draw: 3, Abandoned: 4 }
 
@@ -20,10 +19,6 @@ class Board < ApplicationRecord
     self.table = [nil] * 9
   end
 
-  def set_init_turn
-    self.turn = rand(2) == 0 ? 'X' : 'O'
-  end
-
   def create_game(user)
     self.user_1 = user
   end
@@ -31,10 +26,11 @@ class Board < ApplicationRecord
   def join_game(user)
     self.user_2 = user
     self.state = 1
+    self.turn = rand(2) == 0 ? user_1 : user_2
   end
 
   def can_play?(user)
-    unless !user_2.present? || user_symbol(user) == turn
+    unless !user_2.present? || user == turn
       return false
     end
 
@@ -61,7 +57,7 @@ class Board < ApplicationRecord
 
   def insert_in(index)
     index = index.to_i
-    self.table[index] = turn
+    self.table[index] = user_symbol(turn)
   end
 
   def valid_place?(index)
@@ -69,7 +65,7 @@ class Board < ApplicationRecord
     table[index] == nil && index >= 0 && index < 9
   end
 
-  def winner?(current_user)
+  def winner?(user)
     winning_position = [
       [0, 1, 2],
       [3, 4, 5],
@@ -80,7 +76,7 @@ class Board < ApplicationRecord
       [0, 4, 8],
       [2, 4, 6],
     ]
-    turn = user_symbol(current_user)
+    turn = user_symbol(user)
 
     winning_position.length.times do |i|
       a, b, c = winning_position[i]
@@ -105,7 +101,7 @@ class Board < ApplicationRecord
   end
 
   def set_turn
-    other = self.turn == "X" ? 'O' : 'X'
+    other = self.turn == user_1 ? user_2 : user_1
     self.turn = other
   end
 
