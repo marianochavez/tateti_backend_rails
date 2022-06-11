@@ -1,13 +1,13 @@
 class Api::V1::BoardsController < ApplicationController
-  before_action :set_board, only: [:show, :play, :leave]
-  before_action :find_by_token, only: [:join_game]
-  before_action :check_state, only: [:join_game, :play]
   before_action :set_user, only: [:create, :join_game, :play, :show, :leave]
-  before_action :check_token, only: [:create, :join_game, :play, :show, :leave]
+  before_action :check_token, only: [:create, :join_game, :play, :show, :leave] #user
+  before_action :set_board, only: [:show, :play, :leave]
+  before_action :find_by_token, only: [:join_game] #find table by token
+  before_action :check_state, only: [:join_game, :play]
 
   def index
-    @boards = Board.all
-    render json: { data: @boards }, status: :ok
+    boards = Board.filter(params.slice(:user_1, :user_2, :state))
+    render json: { data: boards }, status: :ok
   end
 
   def show
@@ -51,6 +51,9 @@ class Api::V1::BoardsController < ApplicationController
   end
 
   def play
+    if @board.users.length == 1
+      return render json: { error: 'Second player needed' }, status: :unprocessable_entity
+    end
 
     unless @board.valid_turn?(@user)
       return render json: { error: 'This is not your turn' }, status: :unprocessable_entity
@@ -76,9 +79,11 @@ class Api::V1::BoardsController < ApplicationController
   end
 
   def historical
+    # user query params
+    # ransack
     @user1 = User.find_by(username: params[:username_1])
     @user2 = User.find_by(username: params[:username_2])
-    
+
     if @user2.present?
       @boards = @user1.boards.filter { |board| board.users.include? @user2 }
     else
@@ -95,7 +100,7 @@ class Api::V1::BoardsController < ApplicationController
 
     @board.state = 'Finished'
     if @board.save
-      render json: {data: @board}, status: :ok
+      render json: { data: @board }, status: :ok
     end
   end
 
@@ -123,4 +128,5 @@ class Api::V1::BoardsController < ApplicationController
     render json: { error: 'Board not found' }, status: :not_found
     false
   end
+
 end

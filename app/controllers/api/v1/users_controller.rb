@@ -17,6 +17,7 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  # TODO delete
   def enable
     if @user.update(enabled: true)
       render json: { data: @user }, status: :ok
@@ -25,6 +26,7 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  # TODO delete
   def disable
     if @user.update(enabled: false)
       render json: { data: @user }, status: :ok
@@ -35,7 +37,6 @@ class Api::V1::UsersController < ApplicationController
 
   def sign_in
     @user = User.find_by(username: params[:username])
-    #todo: check if enabled
 
     if @user.present? && @user.authenticate(params[:password])
       @user.generate_token
@@ -48,7 +49,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def sign_out
-    @user.generate_token
+    # @user.generate_token
     if @user.save
       render status: :ok
     else
@@ -56,7 +57,7 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
-  #TODO delete??
+  #TODO delete
   def password
     if @user.authenticate(params[:password])
       if @user.update(params.permit(:password, :password_confirmation))
@@ -68,8 +69,6 @@ class Api::V1::UsersController < ApplicationController
       render json: {error: 'Invalid password'},status: :unauthorized
     end
   end
-
-  #TODO def current
 
   private
 

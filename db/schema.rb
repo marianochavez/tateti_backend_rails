@@ -10,17 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_05_16_141023) do
+ActiveRecord::Schema[7.0].define(version: 2022_05_16_140437) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "boards", force: :cascade do |t|
     t.text "table"
-    t.string "state"
+    t.integer "state", default: 0
     t.string "turn"
     t.string "winner"
-    t.boolean "myTurn"
-    t.string "token"
+    t.text "user_1"
+    t.text "user_2"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -29,19 +29,9 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_16_141023) do
     t.string "username"
     t.string "name"
     t.string "password_digest"
-    t.boolean "enabled", default: true
     t.string "token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "users_boards", force: :cascade do |t|
-    t.bigint "user_id"
-    t.bigint "board_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["board_id"], name: "index_users_boards_on_board_id"
-    t.index ["user_id"], name: "index_users_boards_on_user_id"
   end
 
 end

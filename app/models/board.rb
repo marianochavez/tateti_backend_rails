@@ -1,20 +1,30 @@
 class Board < ApplicationRecord
 
-  has_and_belongs_to_many :users, join_table: 'users_boards'
+  has_many :users
 
-  serialize :table #save an object
+  before_create :set_init_table
+  before_create :set_init_turn
 
-  def initialize_board(current_user)
+  enum state: { Queue: 0, Playing: 1, Finished: 2 }
+
+  serialize :table
+
+  include Filterable
+  scope :filter_by_state, -> (state) {where state: state}
+  scope :filter_by_user_1, -> (user_1) {where user_1: user_1}
+  scope :filter_by_user_2, -> (user_2) {where user_2: user_2}
+
+  def set_init_table
     self.table = [nil]*9
-    self.state = 'Queue'
+  end
+
+  def set_init_turn
     self.turn = rand(2) == 0 ? 'X' : 'O'
-    self.users.push(current_user)
-    self.token = SecureRandom.hex(5)
   end
 
   def join_game(current_user)
-    self.users.push(current_user)
-    self.state = 'Playing'
+    self.user_1 = current_user
+    self.state = 3
   end
 
   def user_symbol(user)
@@ -89,4 +99,5 @@ class Board < ApplicationRecord
   def valid_token?(token)
     self.token == token
   end
+
 end
