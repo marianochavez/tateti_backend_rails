@@ -2,7 +2,7 @@
 
 ## Deploy
 
-Deploy: https://tateti-rails.herokuapp.com/
+Deploy: https://tateti-rails.onrender.com/api/v1
 
 ## Frontend
 
